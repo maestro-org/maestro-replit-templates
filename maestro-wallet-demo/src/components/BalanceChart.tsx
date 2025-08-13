@@ -7,7 +7,29 @@ interface BalanceChartProps {
 }
 
 const BalanceChart: React.FC<BalanceChartProps> = ({ data }) => {
-  const chartData = data.map(item => ({
+  // Function to aggregate data by hour instead of day for better granularity
+  const aggregateDataByHour = (data: HistoricalBalance[]): HistoricalBalance[] => {
+    const hourlyData = new Map<string, HistoricalBalance>()
+    
+    data.forEach(item => {
+      const date = new Date(item.timestamp)
+      // Group by hour: YYYY-MM-DD-HH
+      const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${String(date.getHours()).padStart(2, '0')}`
+      
+      if (!hourlyData.has(hourKey) || item.height > hourlyData.get(hourKey)!.height) {
+        hourlyData.set(hourKey, item)
+      }
+    })
+    
+    // Convert back to array and sort by date
+    return Array.from(hourlyData.values()).sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
+  }
+  
+  const aggregatedData = aggregateDataByHour(data)
+  
+  const chartData = aggregatedData.map(item => ({
     ...item,
     btc_balance: parseInt(item.sat_balance) / 100000000,
     usd_balance_num: parseFloat(item.usd_balance),

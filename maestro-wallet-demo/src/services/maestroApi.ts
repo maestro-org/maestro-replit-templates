@@ -60,8 +60,8 @@ export class MaestroApiService {
 
   async getRuneInfo(runeId: string): Promise<RuneInfo> {
     const url = this.buildUrlWithParam(ENDPOINTS.RUNE_INFO, 'rune_id', runeId)
-    const response = await this.indexerClient.get<RuneInfo>(url)
-    return response.data
+    const response = await this.indexerClient.get<{ data: RuneInfo }>(url)
+    return response.data.data // Extract the nested data object
   }
 
   // Helper method to process rune UTXOs into aggregated balances with metadata
@@ -97,7 +97,7 @@ export class MaestroApiService {
     const runeInfoMap = new Map<string, RuneInfo | null>()
 
     runeInfoResults.forEach((result) => {
-      if (result.status === 'fulfilled') {
+      if (result.status === 'fulfilled' && result.value) {
         runeInfoMap.set(result.value.runeId, result.value.info)
       }
     })
@@ -106,10 +106,23 @@ export class MaestroApiService {
     const processedBalances = []
     for (const [runeId, balance] of balanceMap.entries()) {
       const info = runeInfoMap.get(runeId)
+      
+      // Use spaced_name for display, fallback to name, then runeId
+      const displayName = info?.spaced_name || info?.name || runeId
+      
+      // Extract symbol directly from the API response
+      let symbol = '?'
+      if (info?.symbol) {
+        symbol = info.symbol
+      } else if (displayName && displayName !== runeId) {
+        // Use first 3 characters of display name as fallback only if no symbol
+        symbol = displayName.substring(0, 3).toUpperCase()
+      }
+      
       processedBalances.push({
         rune_id: runeId,
-        rune_name: info?.name || runeId,
-        rune_symbol: info?.symbol || '?',
+        rune_name: displayName,
+        rune_symbol: symbol,
         balance: balance.toString(),
         divisibility: info?.divisibility || 0,
         spacers: 0, // This would need to be parsed from spaced_name if needed
@@ -145,7 +158,10 @@ export class MaestroApiService {
 
   async getHistoricalBalance(address: string, from?: string, to?: string): Promise<HistoricalBalanceResponse> {
     const url = this.buildUrl(ENDPOINTS.HISTORICAL_BALANCE, address)
-    const params: any = {}
+    const params: any = {
+      order: 'desc', // Sort by descending order (newest first)
+      height_params: 'false' // Use timestamp parameters instead of block height
+    }
     if (from) params.from = from
     if (to) params.to = to
     const response = await this.client.get<HistoricalBalanceResponse>(url, { params })
@@ -153,25 +169,25 @@ export class MaestroApiService {
   }
 
   // Helper method to get all wallet insights
-  async getWalletInsights(address: string) {
+  async getWalletInsights(address: string): Promise<any> {
     try {
-      const [
-        stats,
-        runes,
-        runeUtxos,
-        inscriptions,
-        metaprotocols,
-        satoshis,
-        historicalBalance
-      ] = await Promise.allSettled([
+      // Calculate date range for the last 3 days
+      const now = new Date();
+      const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+      
+      // Convert dates to Unix timestamps (seconds)
+      const fromTimestamp = Math.floor(threeDaysAgo.getTime() / 1000).toString();
+      const toTimestamp = Math.floor(now.getTime() / 1000).toString();
+
+      const [stats, runes, runeUtxos, inscriptions, metaprotocols, satoshis, historicalBalance] = await Promise.allSettled([
         this.getAddressStatistics(address),
-        this.getRuneActivity(address, 10),
+        this.getRuneActivity(address),
         this.getRuneUtxos(address),
-        this.getInscriptionActivity(address, 10),
-        this.getMetaprotocolActivity(address, 10),
-        this.getSatoshiActivity(address, 10),
-        this.getHistoricalBalance(address)
-      ])
+        this.getInscriptionActivity(address),
+        this.getMetaprotocolActivity(address),
+        this.getSatoshiActivity(address),
+        this.getHistoricalBalance(address, fromTimestamp, toTimestamp)
+      ]);
 
       // Process rune balances if UTXOs were fetched successfully
       let processedRuneBalances = null

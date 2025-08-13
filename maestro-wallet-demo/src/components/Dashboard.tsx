@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
                     {(parseInt(walletData.stats.data.sat_balance) / 100000000).toFixed(8)} BTC
                   </div>
                   <div className="stat-label">Current Balance</div>
-                  <div className="stat-usd">${walletData.stats.data.usd_balance}</div>
+                  <div className="stat-usd">${parseFloat(walletData.stats.data.usd_balance || '0').toFixed(2)}</div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-value">{walletData.stats.data.total_txs}</div>
@@ -114,6 +114,8 @@ const Dashboard: React.FC = () => {
                   <span className="activity-label">Pending Balance:</span>
                   <span className="activity-value">
                     {(parseInt(walletData.stats.data.pending.sat_balance) / 100000000).toFixed(8)} BTC
+                    <br />
+                    <span className="usd-amount">${parseFloat(walletData.stats.data.pending.usd_balance || '0').toFixed(2)}</span>
                   </span>
                 </div>
                 <div className="activity-item">

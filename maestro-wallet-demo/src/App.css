@@ -434,7 +434,7 @@ p {
 
 .metaprotocol-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
 }
 
@@ -761,7 +761,7 @@ p {
   }
   
   .metaprotocol-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   
   .stats-grid {
@@ -1605,6 +1605,7 @@ p {
 /* Rune Balance Card Styles */
 .runes-card {
   min-height: 300px;
+  min-width: 320px; /* Ensure enough width for rune cards */
 }
 
 .rune-balances-container {
@@ -1630,9 +1631,10 @@ p {
   background: var(--maestro-bg-primary);
   border: 1px solid var(--maestro-border-light);
   border-radius: 8px;
-  padding: 0.875rem;
+  padding: 1rem;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  min-width: 280px; /* Increased minimum width */
 }
 
 .rune-balance-card:hover {
@@ -1670,17 +1672,19 @@ p {
   justify-content: space-between;
   align-items: center;
   margin-top: 0.5rem;
+  gap: 0.5rem; /* Add gap for better spacing */
 }
 
 .rune-name {
   font-size: 0.75rem;
   color: var(--maestro-text-secondary);
   font-weight: 500;
-  max-width: 60%;
+  max-width: 85%; /* Increased from 60% to 85% */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: help;
+  flex: 1; /* Allow it to take remaining space */
 }
 
 .rune-name:hover {
