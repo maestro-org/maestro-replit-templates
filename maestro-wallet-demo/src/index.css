@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Maestro Color Palette */
+  --maestro-purple: #C53DD8;
+  --maestro-purple-light: #E879F3;
+  --maestro-purple-dark: #A02CB5;
+  --maestro-bg-primary: #FFFFFF;
+  --maestro-bg-secondary: #F8FAFC;
+  --maestro-bg-tertiary: #F1F5F9;
+  --maestro-text-primary: #1E293B;
+  --maestro-text-secondary: #64748B;
+  --maestro-text-muted: #94A3B8;
+  --maestro-border: #E2E8F0;
+  --maestro-border-light: #F1F5F9;
+  --maestro-success: #10B981;
+  --maestro-warning: #F59E0B;
+  --maestro-error: #EF4444;
+  --maestro-bitcoin: #F7931A;
+
+  color: var(--maestro-text-primary);
+  background-color: var(--maestro-bg-secondary);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--maestro-bg-secondary) 0%, var(--maestro-bg-tertiary) 100%);
+}
+
+#root {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1rem;
+  width: 100%;
+}
