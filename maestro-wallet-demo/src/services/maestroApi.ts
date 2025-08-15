@@ -11,6 +11,8 @@ import {
   HistoricalBalanceResponse
 } from '../types/api'
 
+const RUNE_DECIMAL_PRECISION = 100000000 // 8 decimal places for Runes
+
 export class MaestroApiService {
   private client: AxiosInstance
   private indexerClient: AxiosInstance
