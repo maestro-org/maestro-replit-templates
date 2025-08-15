@@ -12,17 +12,13 @@ export interface IndexerApiConfig {
   network: Network
 }
 
-// Wallet API URLs
-const WALLET_MAINNET_URL = import.meta.env.VITE_MAESTRO_WALLET_MAINNET_URL || 'https://xbt-mainnet.gomaestro-api.org/v0'
-const WALLET_TESTNET_URL = import.meta.env.VITE_MAESTRO_WALLET_TESTNET_URL || 'https://xbt-testnet.gomaestro-api.org/v0'
+// Maestro API Base URLs (used for both Wallet and Blockchain Indexer endpoints)
+const MAESTRO_MAINNET_URL = import.meta.env.VITE_MAESTRO_MAINNET_URL || 'https://xbt-mainnet.gomaestro-api.org/v0'
+const MAESTRO_TESTNET_URL = import.meta.env.VITE_MAESTRO_TESTNET_URL || 'https://xbt-testnet.gomaestro-api.org/v0'
 
-// Blockchain Indexer API URLs (same base as wallet but for blockchain-indexer endpoints)
-const INDEXER_MAINNET_URL = import.meta.env.VITE_MAESTRO_INDEXER_MAINNET_URL || 'https://xbt-mainnet.gomaestro-api.org/v0'
-const INDEXER_TESTNET_URL = import.meta.env.VITE_MAESTRO_INDEXER_TESTNET_URL || 'https://xbt-testnet.gomaestro-api.org/v0'
-
-// Event Manager API URLs - now using the same base URLs as wallet API
-const EVENT_MANAGER_MAINNET_URL = `${WALLET_MAINNET_URL}/eventmanager`
-const EVENT_MANAGER_TESTNET_URL = `${WALLET_TESTNET_URL}/eventmanager`
+// Event Manager API URLs - using the same base URLs
+const EVENT_MANAGER_MAINNET_URL = `${MAESTRO_MAINNET_URL}/eventmanager`
+const EVENT_MANAGER_TESTNET_URL = `${MAESTRO_TESTNET_URL}/eventmanager`
 
 const MAINNET_API_KEY = import.meta.env.VITE_MAESTRO_MAINNET_API_KEY || ''
 const TESTNET_API_KEY = import.meta.env.VITE_MAESTRO_TESTNET_API_KEY || ''
@@ -31,7 +27,7 @@ const DEFAULT_NETWORK = (import.meta.env.VITE_DEFAULT_NETWORK as Network) || 'ma
 export const getApiConfig = (network: Network = DEFAULT_NETWORK): ApiConfig => {
   return {
     apiKey: network === 'mainnet' ? MAINNET_API_KEY : TESTNET_API_KEY,
-    baseUrl: network === 'mainnet' ? WALLET_MAINNET_URL : WALLET_TESTNET_URL,
+    baseUrl: network === 'mainnet' ? MAESTRO_MAINNET_URL : MAESTRO_TESTNET_URL,
     network
   }
 }
@@ -39,7 +35,7 @@ export const getApiConfig = (network: Network = DEFAULT_NETWORK): ApiConfig => {
 export const getIndexerApiConfig = (network: Network = DEFAULT_NETWORK): IndexerApiConfig => {
   return {
     apiKey: network === 'mainnet' ? MAINNET_API_KEY : TESTNET_API_KEY,
-    baseUrl: network === 'mainnet' ? INDEXER_MAINNET_URL : INDEXER_TESTNET_URL,
+    baseUrl: network === 'mainnet' ? MAESTRO_MAINNET_URL : MAESTRO_TESTNET_URL,
     network
   }
 }

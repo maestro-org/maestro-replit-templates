@@ -8,17 +8,22 @@ interface RuneBalanceCardProps {
 const RuneBalanceCard: React.FC<RuneBalanceCardProps> = ({ rune }) => {
   // Format the rune amount based on divisibility
   const formatRuneAmount = (amount: string, divisibility: number): string => {
-    const num = BigInt(amount)
-    const divisor = BigInt(10 ** divisibility)
-    const integerPart = num / divisor
-    const fractionalPart = num % divisor
-    
-    if (fractionalPart === 0n) {
-      return integerPart.toString()
+    try {
+      const num = BigInt(amount)
+      const divisor = BigInt(10 ** divisibility)
+      const integerPart = num / divisor
+      const fractionalPart = num % divisor
+      
+      if (fractionalPart === 0n) {
+        return integerPart.toString()
+      }
+      
+      const fractionalStr = fractionalPart.toString().padStart(divisibility, '0').replace(/0+$/, '')
+      return `${integerPart}.${fractionalStr}`
+    } catch (error) {
+      console.error('Error formatting rune amount:', error)
+      return amount // Return original amount as fallback
     }
-    
-    const fractionalStr = fractionalPart.toString().padStart(divisibility, '0').replace(/0+$/, '')
-    return `${integerPart}.${fractionalStr}`
   }
 
   // Format rune name with spacers if available

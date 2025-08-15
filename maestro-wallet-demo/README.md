@@ -33,13 +33,17 @@ A comprehensive Bitcoin wallet analytics dashboard powered by Maestro's APIs. Th
 This project is configured for easy deployment on Replit:
 
 1. Import this repository to Replit
-2. Set up environment variables in Replit's Secrets tab:
-   - `VITE_MAESTRO_MAINNET_API_KEY`: Your mainnet API key
-   - `VITE_MAESTRO_TESTNET_API_KEY`: Your testnet API key
+2. Set up secrets in Replit's Secrets tab:
+   - `MAESTRO_MAINNET_API_KEY`: Your mainnet API key
+   - `MAESTRO_TESTNET_API_KEY`: Your testnet API key
+   - `MAESTRO_MAINNET_URL` (optional): Mainnet base URL (defaults to https://xbt-mainnet.gomaestro-api.org/v0)
+   - `MAESTRO_TESTNET_URL` (optional): Testnet base URL (defaults to https://xbt-testnet.gomaestro-api.org/v0)
+   - `DEFAULT_NETWORK` (optional): Default network to use (defaults to mainnet)
 3. Run the project - it will automatically start
 
 ### Environment Variables
 
+**For Local Development (.env file):**
 ```env
 # Maestro API Configuration
 VITE_MAESTRO_MAINNET_API_KEY=your_mainnet_api_key_here
@@ -52,6 +56,13 @@ VITE_MAESTRO_TESTNET_URL=https://xbt-testnet.gomaestro-api.org/v0
 # Default network
 VITE_DEFAULT_NETWORK=mainnet
 ```
+
+**For Replit Deployment (use Secrets tab):**
+- `MAESTRO_MAINNET_API_KEY`: Your mainnet API key
+- `MAESTRO_TESTNET_API_KEY`: Your testnet API key  
+- `MAESTRO_MAINNET_URL`: (optional) Mainnet base URL
+- `MAESTRO_TESTNET_URL`: (optional) Testnet base URL
+- `DEFAULT_NETWORK`: (optional) Default network (mainnet/testnet)
 
 ## API Endpoints Used
 
