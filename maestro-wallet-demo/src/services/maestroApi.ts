@@ -123,7 +123,8 @@ export class MaestroApiService {
           const amountStr = String(rune.amount)
           const amountFloat = parseFloat(amountStr)
           // Convert to the smallest unit (multiply by 100000000 to handle 8 decimal places)
-          const amountInteger = Math.round(amountFloat * 100000000)
+          // Convert to the smallest unit (multiply by RUNE_DECIMAL_PRECISION to handle 8 decimal places)
+          const amountInteger = Math.round(amountFloat * RUNE_DECIMAL_PRECISION)
           balanceMap.set(rune.rune_id, currentBalance + BigInt(amountInteger))
           runeIds.add(rune.rune_id)
         } catch (error) {
