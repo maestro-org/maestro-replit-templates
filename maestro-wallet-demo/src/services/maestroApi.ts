@@ -121,6 +121,7 @@ export class MaestroApiService {
           const currentBalance = balanceMap.get(rune.rune_id) || 0n
           // Convert decimal string to integer by parsing as float and converting to integer
           const amountStr = String(rune.amount)
+          // @dev: consider using decimal library for better precision
           const amountFloat = parseFloat(amountStr)
           // Convert to the smallest unit (multiply by 100000000 to handle 8 decimal places)
           const amountInteger = Math.round(amountFloat * 100000000)
