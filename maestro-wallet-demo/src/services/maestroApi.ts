@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { ApiConfig, IndexerApiConfig, getApiHeaders, getIndexerApiConfig, ENDPOINTS } from '../config/api'
+import { ApiConfig, getApiHeaders, getIndexerApiConfig, ENDPOINTS } from '../config/api'
 import {
   AddressStatsResponse,
   RuneActivityResponse,
@@ -29,6 +29,11 @@ export class MaestroApiService {
       headers: getApiHeaders(indexerConfig.apiKey),
       timeout: 30000 // Increased to 30 seconds
     })
+  }
+
+  // Get current network configuration
+  getNetworkConfig() {
+    return this.config
   }
 
   // Helper method for retrying failed requests
