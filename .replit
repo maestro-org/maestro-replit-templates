@@ -1,5 +1,5 @@
 modules = ["nodejs-20", "web", "nix"]
-run = "cd maestro-wallet-demo && npm install && npm run dev"
+run = "cd maestro-wallet-demo && chmod +x start.sh && ./start.sh"
 
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
@@ -9,7 +9,7 @@ channel = "stable-25_05"
 [deployment]
 deploymentTarget = "autoscale"
 build = ["cd", "maestro-wallet-demo", "&&", "npm", "run", "build"]
-run = ["sh", "-c", "cd maestro-wallet-demo && npm install && npm run dev"]
+run = ["sh", "-c", "cd maestro-wallet-demo && chmod +x start.sh && ./start.sh"]
 
 [[ports]]
 localPort = 5000
@@ -37,5 +37,5 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd maestro-wallet-demo && npm install && npm run dev"
+args = "cd maestro-wallet-demo && chmod +x start.sh && ./start.sh"
 waitForPort = 5000
