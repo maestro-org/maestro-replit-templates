@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { ApiConfig, IndexerApiConfig, getApiHeaders, getIndexerApiConfig, ENDPOINTS } from '../config/api'
+import { ApiConfig, getApiHeaders, getIndexerApiConfig, ENDPOINTS } from '../config/api'
 import {
   AddressStatsResponse,
   RuneActivityResponse,
@@ -11,6 +11,8 @@ import {
   HistoricalBalanceResponse
 } from '../types/api'
 
+const RUNE_DECIMAL_PRECISION = 100000000 // 8 decimal places for Runes
+
 export class MaestroApiService {
   private client: AxiosInstance
   private indexerClient: AxiosInstance
@@ -19,7 +21,7 @@ export class MaestroApiService {
     this.client = axios.create({
       baseURL: config.baseUrl,
       headers: getApiHeaders(config.apiKey),
-      timeout: 10000
+      timeout: 30000 // Increased to 30 seconds
     })
 
     // Create a separate client for indexer endpoints
@@ -27,8 +29,45 @@ export class MaestroApiService {
     this.indexerClient = axios.create({
       baseURL: indexerConfig.baseUrl,
       headers: getApiHeaders(indexerConfig.apiKey),
-      timeout: 10000
+      timeout: 30000 // Increased to 30 seconds
     })
+  }
+
+  // Get current network configuration
+  getNetworkConfig() {
+    return this.config
+  }
+
+  // Helper method for retrying failed requests
+  private async retryRequest<T>(
+    requestFn: () => Promise<T>,
+    maxRetries: number = 2,
+    delay: number = 1000
+  ): Promise<T> {
+    let lastError: any
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await requestFn()
+      } catch (error: any) {
+        lastError = error
+        
+        // Don't retry on 4xx errors (client errors)
+        if (error?.response?.status && error.response.status >= 400 && error.response.status < 500) {
+          throw error
+        }
+        
+        // Don't retry on the last attempt
+        if (attempt === maxRetries) {
+          break
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, delay * (attempt + 1)))
+      }
+    }
+    
+    throw lastError
   }
 
   private buildUrl(endpoint: string, address: string): string {
@@ -40,16 +79,20 @@ export class MaestroApiService {
   }
 
   async getAddressStatistics(address: string): Promise<AddressStatsResponse> {
-    const url = this.buildUrl(ENDPOINTS.ADDRESS_STATS, address)
-    const response = await this.client.get<AddressStatsResponse>(url)
-    return response.data
+    return this.retryRequest(async () => {
+      const url = this.buildUrl(ENDPOINTS.ADDRESS_STATS, address)
+      const response = await this.client.get<AddressStatsResponse>(url)
+      return response.data
+    })
   }
 
   async getRuneActivity(address: string, limit?: number): Promise<RuneActivityResponse> {
-    const url = this.buildUrl(ENDPOINTS.RUNE_ACTIVITY, address)
-    const params = limit ? { limit } : {}
-    const response = await this.client.get<RuneActivityResponse>(url, { params })
-    return response.data
+    return this.retryRequest(async () => {
+      const url = this.buildUrl(ENDPOINTS.RUNE_ACTIVITY, address)
+      const params = limit ? { limit } : {}
+      const response = await this.client.get<RuneActivityResponse>(url, { params })
+      return response.data
+    })
   }
 
   async getRuneUtxos(address: string): Promise<RuneUtxosResponse> {
@@ -76,9 +119,21 @@ export class MaestroApiService {
 
     for (const utxo of runeUtxos.data) {
       for (const rune of utxo.runes) {
-        const currentBalance = balanceMap.get(rune.rune_id) || 0n
-        balanceMap.set(rune.rune_id, currentBalance + BigInt(rune.amount))
-        runeIds.add(rune.rune_id)
+        try {
+          const currentBalance = balanceMap.get(rune.rune_id) || 0n
+          // Convert decimal string to integer by parsing as float and converting to integer
+          const amountStr = String(rune.amount)
+          // @dev: consider using decimal library for better precision
+          const amountFloat = parseFloat(amountStr)
+          // Convert to the smallest unit (multiply by 100000000 to handle 8 decimal places)
+          // Convert to the smallest unit (multiply by RUNE_DECIMAL_PRECISION to handle 8 decimal places)
+          const amountInteger = Math.round(amountFloat * RUNE_DECIMAL_PRECISION)
+          balanceMap.set(rune.rune_id, currentBalance + BigInt(amountInteger))
+          runeIds.add(rune.rune_id)
+        } catch (error) {
+          console.error(`Error processing rune ${rune.rune_id} with amount ${rune.amount}:`, error)
+          // Continue processing other runes
+        }
       }
     }
 

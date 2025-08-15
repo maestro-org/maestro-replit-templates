@@ -36,10 +36,35 @@ export const useMaestroApi = () => {
       
       if (insights.errors && insights.errors.length > 0) {
         console.warn('Some API calls failed:', insights.errors)
-        // Don't set as an error - data is still partially available
+        
+        // Check for timeout errors specifically
+        const timeoutErrors = insights.errors.filter((err: any) => 
+          err.error?.code === 'ECONNABORTED' || 
+          err.error?.message?.includes('timeout') ||
+          err.error?.message?.includes('aborted')
+        )
+        
+        if (timeoutErrors.length > 0) {
+          setError(`Some data couldn't be loaded due to timeouts. Showing available data. (${timeoutErrors.length} requests timed out)`)
+        } else {
+          // Don't set as an error - data is still partially available
+          console.log('Some API calls failed but continuing with available data')
+        }
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch wallet data'
+    } catch (err: any) {
+      let errorMessage = 'Failed to fetch wallet data'
+      
+      // Handle specific error types
+      if (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. The address may have too much activity to load quickly. Please try again or try a different address.'
+      } else if (err?.response?.status === 429) {
+        errorMessage = 'Too many requests. Please wait a moment and try again.'
+      } else if (err?.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.'
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      
       setError(errorMessage)
       console.error('API Error:', err)
     } finally {
